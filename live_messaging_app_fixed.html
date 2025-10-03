@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Messaging App</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #messages { height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa; }
+    .msg { margin: 5px 0; padding: 8px; border-radius: 5px; }
+    .me { background: #d1ffd1; text-align: right; }
+    .other { background: #e1e1ff; text-align: left; }
+    input, button { padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; }
+    button { cursor: pointer; background: #007bff; color: white; border: none; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔥 Live Messaging</h2>
+
+    <div id="auth-section">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="signUp()">Sign Up</button>
+      <button onclick="signIn()">Sign In</button>
+      <button onclick="googleLogin()">Sign In with Google</button>
+    </div>
+
+    <div id="chat-section" style="display:none;">
+      <p>Welcome, <span id="user-name"></span> <button onclick="logout()">Logout</button></p>
+      <div id="messages"></div>
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+             GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } 
+             from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getDatabase, ref, push, onChildAdded } 
+             from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    // Your Firebase config (fixed storageBucket)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUH95hXYxMVCfhJglN4j3CReXy-CLYwmA",
+      authDomain: "live-messageinggkkh.firebaseapp.com",
+      databaseURL: "https://live-messageinggkkh-default-rtdb.firebaseio.com",
+      projectId: "live-messageinggkkh",
+      storageBucket: "live-messageinggkkh.appspot.com",
+      messagingSenderId: "537475612761",
+      appId: "1:537475612761:web:d00723c117383e54027148"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const messagesRef = ref(db, "messages");
+
+    // Auth Functions
+    window.signUp = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .catch(e => alert(e.message));
+    }
+
+    window.signIn = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .catch(e => alert(e.message));
+    }
+
+    window.googleLogin = function () {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).catch(e => alert(e.message));
+    }
+
+    window.logout = function () {
+      signOut(auth);
+    }
+
+    // Track user login state
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("chat-section").style.display = "block";
+        document.getElementById("user-name").innerText = user.email || user.displayName;
+
+        loadMessages(user);
+      } else {
+        document.getElementById("auth-section").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+      }
+    });
+
+    // Send Message
+    window.sendMessage = function () {
+      const msg = document.getElementById("messageInput").value;
+      if (msg.trim() === "") return;
+      const user = auth.currentUser;
+      push(messagesRef, {
+        uid: user.uid,
+        sender: user.email || user.displayName,
+        text: msg,
+        timestamp: Date.now()
+      });
+      document.getElementById("messageInput").value = "";
+    }
+
+    // Load Messages in real-time
+    function loadMessages(user) {
+      document.getElementById("messages").innerHTML = "";
+      onChildAdded(messagesRef, (data) => {
+        const msg = data.val();
+        const div = document.createElement("div");
+        div.classList.add("msg");
+        div.classList.add(msg.uid === user.uid ? "me" : "other");
+        div.innerText = `${msg.sender}: ${msg.text}`;
+        document.getElementById("messages").appendChild(div);
+        document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+      });
+    }
+  </script>
+</body>
+</html>
