@@ -1,5 +1,6 @@
-// MODNet portrait matting via onnxruntime-web. Local ONNX file, WebGPU with WASM fallback.
-const MODEL_URL = "modnet_fp16.onnx";
+// MODNet portrait matting via onnxruntime-web. Model streamed from Hugging Face,
+// WebGPU with WASM fallback. No local ONNX file is bundled.
+const MODEL_URL = "https://huggingface.co/Xenova/modnet/resolve/main/onnx/model_fp16.onnx";
 const REF = 512;
 const STRIDE = 32;
 

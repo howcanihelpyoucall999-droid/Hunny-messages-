@@ -14,7 +14,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
-<link rel="prefetch" href="modnet_fp16.onnx" as="fetch" crossorigin />
 </head>
 <body>
 <div id="app">
@@ -53,21 +52,30 @@
       <div id="crystalBox"><canvas id="crystalCanvas"></canvas></div>
     </div>
     <div class="hero">
-      <h1>Passport photos in <span class="grad">seconds</span></h1>
+      <h1>Passport photos<br /><span class="grad">in seconds</span></h1>
       <p class="lead">AI background removal runs fully in your browser. Private, fast, better.</p>
+      <div class="features">
+        <div class="feat">
+          <div class="featI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></div>
+          <div><div class="featT">Instant result</div><div class="featS">On-device AI</div></div>
+        </div>
+        <div class="feat">
+          <div class="featI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M10 10v4M7 12h3" stroke-linecap="round"/><path d="M13.5 10v4M13.5 10h1.6a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-1.6" stroke-linecap="round"/></svg></div>
+          <div><div class="featT">High quality</div><div class="featS">MODNet matting</div></div>
+        </div>
+        <div class="feat">
+          <div class="featI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <div><div class="featT">Private &amp; secure</div><div class="featS">No uploads ever</div></div>
+        </div>
+      </div>
       <div id="drop" class="drop">
         <input id="fileInput" type="file" accept="image/*" hidden />
         <div class="dropInner">
-          <div class="dropIcon">📷</div>
+          <div class="dropIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></svg></div>
           <div class="dropTitle">Drop a photo or tap to choose</div>
           <div class="dropSub">JPG or PNG · Your image never leaves this device</div>
           <button id="pickBtn" class="btn primary">Choose photo</button>
         </div>
-      </div>
-      <div class="features">
-        <div class="feat"><div class="featI">⚡</div><div><div class="featT">Instant result</div><div class="featS">On-device AI</div></div></div>
-        <div class="feat"><div class="featI">🎯</div><div><div class="featT">High quality</div><div class="featS">MODNet matting</div></div></div>
-        <div class="feat"><div class="featI">🔒</div><div><div class="featT">Private & secure</div><div class="featS">No uploads ever</div></div></div>
       </div>
       <div id="uploadError" class="err hidden"></div>
     </div>
@@ -122,7 +130,7 @@
           </div>
         </div>
         <button id="dlSingle" class="btn primary big">↓ Download photo</button>
-        <button id="dlSheet" class="btn ghost big">🖨 Download 4×6″ print sheet</button>
+        <button id="dlSheet" class="btn ghost big">Download 4×6″ print sheet</button>
         <div id="timings" class="muted small center"></div>
         <div id="resultError" class="err hidden"></div>
       </div>
