@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>GoBY.pics — Instant Passport Photo Maker</title>
+<meta name="description" content="Create compliant passport & visa photos in seconds. AI background removal runs fully in your browser: private, fast, and better." />
+<meta property="og:title" content="GoBY.pics — Instant Passport Photo Maker" />
+<meta property="og:description" content="AI passport photos in your browser. Private, instant, high-quality." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="prefetch" href="modnet_fp16.onnx" as="fetch" crossorigin />
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="topbar">
+      <img id="logo" src="logo.png" alt="GoBY.pics" />
+      <div class="topright">
+        <span id="backendBadge" class="badge hidden"></span>
+        <div class="btnGroup">
+          <button id="profileBtn" class="iconBtn brand" aria-label="Your profile" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          </button>
+          <button id="menuBtn" class="iconBtn ghost" aria-label="Open menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+          </button>
+          <div id="profileMenu" class="dropdown hidden">
+            <div class="ddHead"><div class="ddName">Guest user</div><div class="ddSub">Not signed in</div></div>
+            <button class="ddItem">Sign in</button>
+            <button class="ddItem">My photos</button>
+            <button class="ddItem">Settings</button>
+          </div>
+          <div id="menuMenu" class="dropdown hidden">
+            <button class="ddItem" data-action="new">New photo</button>
+            <button class="ddItem">Passport sizes</button>
+            <button class="ddItem">How it works</button>
+            <button class="ddItem">Privacy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="uploadView" class="view">
+    <div class="crystalWrap" aria-hidden="true">
+      <div class="crystalGlow"></div>
+      <div id="crystalBox"><canvas id="crystalCanvas"></canvas></div>
+    </div>
+    <div class="hero">
+      <h1>Passport photos in <span class="grad">seconds</span></h1>
+      <p class="lead">AI background removal runs fully in your browser. Private, fast, better.</p>
+      <div id="drop" class="drop">
+        <input id="fileInput" type="file" accept="image/*" hidden />
+        <div class="dropInner">
+          <div class="dropIcon">📷</div>
+          <div class="dropTitle">Drop a photo or tap to choose</div>
+          <div class="dropSub">JPG or PNG · Your image never leaves this device</div>
+          <button id="pickBtn" class="btn primary">Choose photo</button>
+        </div>
+      </div>
+      <div class="features">
+        <div class="feat"><div class="featI">⚡</div><div><div class="featT">Instant result</div><div class="featS">On-device AI</div></div></div>
+        <div class="feat"><div class="featI">🎯</div><div><div class="featT">High quality</div><div class="featS">MODNet matting</div></div></div>
+        <div class="feat"><div class="featI">🔒</div><div><div class="featT">Private & secure</div><div class="featS">No uploads ever</div></div></div>
+      </div>
+      <div id="uploadError" class="err hidden"></div>
+    </div>
+  </section>
+
+  <section id="processingView" class="view hidden">
+    <div class="loader">
+      <div class="loaderRing outer"></div>
+      <div class="loaderRing inner"></div>
+    </div>
+    <div id="procTitle" class="procTitle">Loading AI model…</div>
+    <div id="procSub" class="procSub"></div>
+  </section>
+
+  <section id="resultView" class="view hidden">
+    <div class="resultHead">
+      <div>
+        <h1>Your passport photo is ready</h1>
+        <p class="muted">Fine-tune framing, pick a background, then download.</p>
+      </div>
+      <button id="newBtn" class="btn ghost">↺ New photo</button>
+    </div>
+    <div class="resultGrid">
+      <div class="panel">
+        <div class="previewBox"><canvas id="previewCanvas"></canvas></div>
+        <div class="framing">
+          <div class="frameHead">
+            <h3>Adjust framing</h3>
+            <label class="chk"><input id="guidesChk" type="checkbox" checked /> Guides</label>
+          </div>
+          <label class="slider">Zoom <input id="zoom" type="range" min="0.6" max="1.8" step="0.01" value="1"/></label>
+          <label class="slider">Vertical <input id="offY" type="range" min="-0.35" max="0.35" step="0.005" value="0"/></label>
+          <label class="slider">Horizontal <input id="offX" type="range" min="-0.35" max="0.35" step="0.005" value="0"/></label>
+          <button id="resetFrame" class="linkBtn">Reset framing</button>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="panel small">
+          <div class="pTitle">Photo size</div>
+          <select id="specSelect"></select>
+          <div id="specMeta" class="muted small"></div>
+        </div>
+        <div class="panel small">
+          <div class="pTitle">Background</div>
+          <div id="bgSwatches" class="swatches"></div>
+        </div>
+        <div class="panel small">
+          <div class="pTitle">Format</div>
+          <div class="fmt">
+            <button data-fmt="jpeg" class="fmtBtn active">JPEG</button>
+            <button data-fmt="png" class="fmtBtn">PNG</button>
+          </div>
+        </div>
+        <button id="dlSingle" class="btn primary big">↓ Download photo</button>
+        <button id="dlSheet" class="btn ghost big">🖨 Download 4×6″ print sheet</button>
+        <div id="timings" class="muted small center"></div>
+        <div id="resultError" class="err hidden"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "onnxruntime-web/webgpu": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/ort.webgpu.bundle.min.mjs"
+  }
+}
+</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
